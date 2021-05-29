@@ -2,7 +2,7 @@ import json
 import os
 import os.path
 
-import cv2
+from cv2 import cv2
 import numpy as np
 import torch
 import torch.utils.data as data_utl

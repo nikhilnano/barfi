@@ -10,7 +10,7 @@ import numpy as np
 import torch.nn.functional as F
 from pytorch_i3d import InceptionI3d
 from datasets.nslt_dataset_all import NSLT as Dataset, get_num_class
-import cv2
+from cv2 import cv2
 
 class Predictor:
     def __init__(self):
