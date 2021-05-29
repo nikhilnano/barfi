@@ -5,6 +5,10 @@ app = Flask(__name__)
 
 pred = Predictor()
 
+@app.route('/', methods=['GET'])
+def index():
+    return 'Barfi'
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
