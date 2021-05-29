@@ -1,7 +1,6 @@
 requests
 numpy
 flask
-json
 opencv-python
 -f https://download.pytorch.org/whl/torch_stable.html
 torch==1.8.1+cpu 
