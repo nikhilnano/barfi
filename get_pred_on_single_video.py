@@ -68,24 +68,6 @@ class Predictor:
         input_for_torch_model = transpose_t_input[None, :, :] 
         return input_for_torch_model
 
-    def get_tensor_chunks(self, full_input_tensor):
-        full_input_tensor = np.asarray(full_input_tensor)
-        returning_list=[]
-        total_frames = full_input_tensor.shape[2]
-        if total_frames <= 60:
-            returning_list.append(torch.Tensor(full_input_tensor))
-            return returning_list, 0
-        elif total_frames <=90 and total_frames > 60:
-            for i in range(total_frames-60):
-                input_chunk = full_input_tensor[:,:,np.arange(0+i, 60+i),:,:]
-                returning_list.append(torch.Tensor(input_chunk))
-            return returning_list, total_frames-60    
-        else:
-            for i in range(total_frames-90):
-                input_chunk = full_input_tensor[:,:,np.arange(0+i, 60+i),:,:]
-                returning_list.append(torch.Tensor(input_chunk))
-            return returning_list, total_frames-90
-
     def get_best_class_for_video(self, input_tensor):
         logits = self.i3d(input_tensor)
         predictions = torch.max(logits, dim=2)[0]
@@ -103,19 +85,11 @@ class Predictor:
         final_labels =[]
         
         video_path = self.download_from_firebase(url)
-        toatl_input_for_torch_model = self.load_rgb_frames_from_video(video_path, start=0, num=-1)
-        input_tensors_list, diff = self.get_tensor_chunks(toatl_input_for_torch_model)
-        prev_label, prev_5_prev_label = self.get_best_class_for_video(input_tensors_list[0])
+        input_tensors_list = self.load_rgb_frames_from_video(video_path, start=0, num=-1)
+        prev_label, prev_5_prev_label = self.get_best_class_for_video(input_tensors_list)
         dict_top_5_levels[prev_label] = prev_5_prev_label
         
         final_labels.append(prev_label)
-        for tensor in input_tensors_list:
-            current_label, top_5_labels = self.get_best_class_for_video(tensor)
-            if current_label != prev_label:
-               final_labels.append(current_label)
-               dict_top_5_levels[current_label] = top_5_labels
-               prev_label = current_label
-               
         os.remove(self.image_path)
         ans_dict = {}
         for (k, v) in dict_top_5_levels.items():
